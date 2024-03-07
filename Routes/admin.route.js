@@ -2,6 +2,7 @@ import { Router } from "express";
 import { Admin, Course } from "../Db/index.js";
 import jwt from "jsonwebtoken";
 import AdminAuth from "../Middleware/adminAuth.js";
+import { courseSchema } from "../Zod/course.zod.js";
 
 const adminRouter = Router();
 adminRouter.post("/signup", async (req, res) => {
@@ -40,8 +41,17 @@ adminRouter.post("/signin", async (req, res) => {
 
 adminRouter.post("/courses", AdminAuth, async (req, res) => {
   // TODO: Add validation with zod
-  const title = req.body.title;
-  const price = req.body.price;
+  const validatedCourse = courseSchema.safeParse(req.body);
+
+  if (!validatedCourse.success) {
+    return res.status(401).json({
+      error: "Invalid Body",
+      errorMessage: validatedCourse.error.errors[0].message,
+    });
+  }
+
+  const { price, title } = validatedCourse.data;
+
   // TODO: Check if course already exists
 
   const course = await Course.create({
@@ -49,6 +59,6 @@ adminRouter.post("/courses", AdminAuth, async (req, res) => {
     price: price,
   });
 
-  res.status(201).json({title: course.title, price: course.price});
+  res.status(201).json({ title: course.title, price: course.price });
 });
 export default adminRouter;
