@@ -3,6 +3,7 @@ import express from "express";
 
 import ConnectDb from "./Db/index.js";
 import adminRouter from "./Routes/admin.route.js";
+import studentRouter from "./Routes/student.route.js";
 
 ConnectDb()
   .then(() => {
@@ -10,6 +11,7 @@ ConnectDb()
 
     app.use(express.json());
     app.use("/admin", adminRouter);
+    app.use('/user',studentRouter)
 
     const port = 3000;
     app.listen(port, () => {

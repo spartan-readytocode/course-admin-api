@@ -3,17 +3,35 @@ import { Admin, Course } from "../Db/index.js";
 import jwt from "jsonwebtoken";
 import AdminAuth from "../Middleware/adminAuth.js";
 import { courseSchema } from "../Zod/course.zod.js";
+import { adminSchema } from "../Zod/admin.zod.js";
 
 const adminRouter = Router();
 adminRouter.post("/signup", async (req, res) => {
-  const username = req.body.username;
-  const password = req.body.password;
-  await Admin.create({
-    username: username,
-    password: password,
-  });
-  console.log("the control reaches here");
-  res.send("User created successfully");
+  const validatedAdmin = adminSchema.safeParse(req.body)
+  if(!validatedAdmin.success){
+    return res.status(401).json({
+        msg:"zod validation failed"
+    })
+  }
+  const {username , password} = validatedAdmin.data
+   
+  const UserExists = await Admin.findOne({
+    username:username,
+    password:password
+  })
+  if(!UserExists){
+    await Admin.create({
+      username: username,
+      password: password,
+    });
+    console.log("the control reaches here");
+    res.send("User created successfully");
+  }
+  else{
+    return res.send("User already exists")
+  }
+
+  
 });
 
 adminRouter.post("/signin", async (req, res) => {
