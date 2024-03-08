@@ -4,7 +4,7 @@ const AdminAuth = (req, res, next) => {
     const authHeader = req.headers.authorization; // Use camelCase for consistency
 
     // Check if authorization header exists and has the correct format
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    if (!authHeader ) {
         return res.status(401).json({ message: "Invalid authorization header" });
     }
 
